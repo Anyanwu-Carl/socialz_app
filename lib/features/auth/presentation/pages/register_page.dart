@@ -1,64 +1,22 @@
-/*
-  LOGIN PAGE
-
-  USER CAN LOGIN WITH THEIR EMAIL & PASSWORD
-
-  -----------------------------------------------------
-
-  ONCE THE USER SUCCESSFULLY LOGS IN THEY'LL BE DIRECTED TO THE HOME PAGE
-
-  USER CAN GOTO THE REGISTER PAGE, IF THEY DON"T HAVE AN ACCOUNT YET
-
-*/
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_bloc/features/auth/presentation/components/my_button.dart';
 import 'package:social_bloc/features/auth/presentation/components/my_text_field.dart';
-import 'package:social_bloc/features/auth/presentation/cubit/auth_cubit.dart';
 
-class LoginPage extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   final void Function()? tooglePages;
 
-  const LoginPage({super.key, required this.tooglePages});
+  const RegisterPage({super.key, required this.tooglePages});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   // TEXT CONTROLLER
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
-  // LOGIN METHOD
-  void login() {
-    // PREPARE EMAIL AND PASSWORD
-    final String email = emailController.text;
-    final String password = passwordController.text;
-
-    // AUTH CUBIT
-    final authCubit = context.read<AuthCubit>();
-
-    // ENSURE THAT THE EMAIL AND PASSWORD FIELDS ARE NOT EMPTY
-    if (email.isNotEmpty && password.isNotEmpty) {
-      // LOGIN
-      authCubit.login(email, password);
-    }
-    // DISPLAY ERROR IF SOME FIELDS ARE EMPTY
-    else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter both email and password")),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
+  final confirmPasswordController = TextEditingController();
 
   // UI
   @override
@@ -80,15 +38,24 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 50),
 
-                // WELCOME BACK TEXT
+                // CREATE AN ACCOUNT MESSAGE
                 Text(
-                  "Welcome back, You've been missed!",
+                  "Let's create an account for you!",
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 25),
+
+                // NAME TEXTFIELD
+                MyTextField(
+                  controller: nameController,
+                  hintText: 'Enter your name',
+                  obsureText: false,
+                ),
+
+                const SizedBox(height: 15),
 
                 // EMAIL TEXTFIELD
                 MyTextField(
@@ -106,19 +73,28 @@ class _LoginPageState extends State<LoginPage> {
                   obsureText: true,
                 ),
 
+                const SizedBox(height: 15),
+
+                // CONFIRM PASSWORD TEXTFIELD
+                MyTextField(
+                  controller: confirmPasswordController,
+                  hintText: 'Confirm password',
+                  obsureText: true,
+                ),
+
                 const SizedBox(height: 25),
 
-                // LOGIN BUTTON
-                MyButton(text: "Login", onTap: login),
+                // REGISTER BUTTON
+                MyButton(text: "Register", onTap: () {}),
 
                 const SizedBox(height: 25),
 
-                // NOT A MEMBER? REGISTER NOW!
+                // ALREADY A MEMBER? LOGIN
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Not a member?",
+                      "Already have an account?",
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -129,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                     InkWell(
                       onTap: widget.tooglePages,
                       child: const Text(
-                        "Register now!",
+                        "Login now!",
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,

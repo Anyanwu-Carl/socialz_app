@@ -22,6 +22,7 @@ class MyTextField extends StatelessWidget {
         hintStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
         fillColor: Theme.of(context).colorScheme.secondary,
         filled: true,
+
         // BORDER WHEN NOT SELECTED
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
