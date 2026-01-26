@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:social_bloc/features/auth/domain/entity/app_user.dart';
 import 'package:social_bloc/features/auth/domain/repo/auth_repo.dart';
 
 class FirebaseAuthRepo implements AuthRepo {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 
   @override
   Future<AppUser?> loginWithEmailPassword(String email, String password) async {
@@ -21,7 +23,9 @@ class FirebaseAuthRepo implements AuthRepo {
 
       // RETURN APP USER
       return user;
-    } catch (e) {
+    }
+    // CATCH ANY ERRORS
+    catch (e) {
       throw Exception("Login Failed: $e");
     }
   }
@@ -44,9 +48,17 @@ class FirebaseAuthRepo implements AuthRepo {
         name: name,
       );
 
+      // SAVE USER DATA TO FIRESTORE
+      await firebaseFirestore
+          .collection("users")
+          .doc(user.uid)
+          .set(user.toJson());
+
       // RETURN APP USER
       return user;
-    } catch (e) {
+    }
+    // CATCH ANY ERRORS
+    catch (e) {
       throw Exception("Sign Up Failed: $e");
     }
   }

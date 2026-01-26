@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_bloc/features/auth/presentation/components/my_button.dart';
 import 'package:social_bloc/features/auth/presentation/components/my_text_field.dart';
+import 'package:social_bloc/features/auth/presentation/cubit/auth_cubit.dart';
 
 class RegisterPage extends StatefulWidget {
   final void Function()? tooglePages;
@@ -17,6 +19,51 @@ class _RegisterPageState extends State<RegisterPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+
+  // REGISTER BUTTON FUNCTION
+  void register() {
+    // PREPARE INFO
+    final String name = nameController.text;
+    final String email = emailController.text;
+    final String password = passwordController.text;
+    final String confirmPassword = confirmPasswordController.text;
+
+    // AUTH CUBIT
+    final authCubit = context.read<AuthCubit>();
+
+    // ENSURE FIELDS ARE NOT EMPTY
+    if (name.isNotEmpty &&
+        email.isNotEmpty &&
+        password.isNotEmpty &&
+        confirmPassword.isNotEmpty) {
+      // ENSURE PASSWORDS MATCH
+      if (password == confirmPassword) {
+        authCubit.register(name, email, password);
+      }
+      // SHOW ERROR - PASSWORDS DO NOT MATCH
+      else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Passwords do not match!")),
+        );
+      }
+    }
+    // SHOW ERROR - FIELDS ARE EMPTY
+    else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all fields")),
+      );
+    }
+  }
+
+  // DISPOSE CONTROLLERS
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   // UI
   @override
@@ -85,7 +132,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 25),
 
                 // REGISTER BUTTON
-                MyButton(text: "Register", onTap: () {}),
+                MyButton(text: "Register", onTap: register),
 
                 const SizedBox(height: 25),
 
