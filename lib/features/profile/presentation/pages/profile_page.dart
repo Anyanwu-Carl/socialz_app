@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart'
+    show CachedNetworkImage;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_bloc/features/auth/domain/entity/app_user.dart';
@@ -72,18 +74,30 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 25),
 
                 // PROFILE PIC
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  height: 120,
-                  width: 120,
-                  padding: const EdgeInsets.all(25),
-                  child: Icon(
+                CachedNetworkImage(
+                  imageUrl: user.profileImageUrl,
+                  // LOADING...
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+
+                  // ERROR (FAILED TO LOAD IMAGE) --> DISPLAY DEFAULT AVATAR
+                  errorWidget: (context, url, error) => Icon(
                     Icons.person,
                     size: 72,
                     color: Theme.of(context).colorScheme.primary,
+                  ),
+
+                  // LOADED IMAGE
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 120,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
 

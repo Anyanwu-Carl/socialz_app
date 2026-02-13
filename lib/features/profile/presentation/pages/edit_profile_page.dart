@@ -1,3 +1,8 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_bloc/features/auth/presentation/components/my_text_field.dart';
@@ -14,18 +19,58 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
+  // MOBILE IMAGE PICKER
+  PlatformFile? imagePickedFile;
+
+  // WEB IMAGE PICKER
+  Uint8List? webImage;
+
+  // BIO TEXT CONTROLLER
   final bioTextController = TextEditingController();
+
+  // PICK IMAGE
+  Future<void> pickImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: kIsWeb,
+    );
+
+    if (result != null) {
+      setState(() {
+        imagePickedFile = result.files.first;
+
+        if (kIsWeb) {
+          webImage = imagePickedFile!.bytes;
+        }
+      });
+    }
+  }
 
   // UPDATE PROFILE BUTTON
   void updateProfile() {
     // PROFILE CUBIT
     final profileCubit = context.read<ProfileCubit>();
 
-    if (bioTextController.text.isNotEmpty) {
+    // PREPARE IMAGE & DATA
+    final String uid = widget.user.uid;
+    final String? newBio = bioTextController.text.isNotEmpty
+        ? bioTextController.text
+        : null;
+    final imageMobilePath = kIsWeb ? null : imagePickedFile?.path;
+    final imageWebBytes = kIsWeb ? imagePickedFile?.bytes : null;
+
+    // ONLY UPDATE PROFILE IF THERE'S NEW DATA
+    if (imagePickedFile != null || newBio != null) {
       profileCubit.updateProfile(
-        uid: widget.user.uid,
-        newBio: bioTextController.text,
+        uid: uid,
+        newBio: newBio,
+        imageMobilePath: imageMobilePath,
+        imageWebBytes: imageWebBytes,
       );
+    }
+    // IF NO NEW DATA TO UPDATE --> JUST GO TO PREVIOUS PAGE
+    else {
+      Navigator.pop(context);
     }
   }
 
@@ -57,7 +102,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget buildEditPage({double uploadProgress = 0.0}) {
+  Widget buildEditPage() {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Profile"),
@@ -71,6 +116,58 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: Column(
         children: [
           // PROFILE PICTURE
+          Center(
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
+                shape: BoxShape.circle,
+              ),
+              clipBehavior: Clip.hardEdge,
+
+              child:
+                  // DISPLAY SELECTED IMAGE FOR MOBILE
+                  (!kIsWeb && imagePickedFile != null)
+                  ? Image.file(File(imagePickedFile!.path!), fit: BoxFit.cover)
+                  :
+                    // DISPLAY SELECTED IMAGE FOR WEB
+                    (kIsWeb && webImage != null)
+                  ? Image.memory(webImage!, fit: BoxFit.cover)
+                  :
+                    // NO IMAGE SELECTED --> DISPLAY CURRENT PROFILE PICTURE
+                    CachedNetworkImage(
+                      imageUrl: widget.user.profileImageUrl,
+                      // LOADING...
+                      placeholder: (context, url) =>
+                          const CircularProgressIndicator(),
+
+                      // ERROR (FAILED TO LOAD IMAGE) --> DISPLAY DEFAULT AVATAR
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.person,
+                        size: 72,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+
+                      // LOADED IMAGE
+                      imageBuilder: (context, imageProvider) =>
+                          Image(image: imageProvider, fit: BoxFit.cover),
+                    ),
+            ),
+          ),
+
+          const SizedBox(height: 25),
+
+          // PICK IMAGE BUTTON
+          Center(
+            child: MaterialButton(
+              onPressed: pickImage,
+              color: Colors.green,
+              child: const Text("Pick Image"),
+            ),
+          ),
+
+          const SizedBox(height: 25),
 
           // BIO
           const Text("Bio"),

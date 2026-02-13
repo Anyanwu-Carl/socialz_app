@@ -1,13 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_bloc/features/profile/domain/entities/profile_user.dart';
 import 'package:social_bloc/features/profile/domain/repo/profile_repo.dart';
 import 'package:social_bloc/features/profile/presentation/cubits/profile_states.dart';
+import 'package:social_bloc/features/storage/domain/storage_repo.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileRepo profileRepo;
+  final StorageRepo storageRepo;
 
-  ProfileCubit({required this.profileRepo}) : super(ProfileInitial());
+  ProfileCubit({required this.profileRepo, required this.storageRepo})
+    : super(ProfileInitial());
 
   // FETCH USER PROFILE USING REPO
   Future<void> fetchUserProfile(String uid) async {
@@ -27,7 +31,12 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   // UPDATE BIO AND PROFILE PICTURE
-  Future<void> updateProfile({required String uid, String? newBio}) async {
+  Future<void> updateProfile({
+    required String uid,
+    String? newBio,
+    Uint8List? imageWebBytes,
+    String? imageMobilePath,
+  }) async {
     emit(ProfileLoading());
 
     try {
@@ -40,10 +49,37 @@ class ProfileCubit extends Cubit<ProfileState> {
       }
 
       // PROFILE PICTURE UPDATE
+      String? imageDownloadUrl;
+
+      // ENSURE THERE'S AN IMAGE TO UPLOAD
+      if (imageWebBytes != null || imageMobilePath != null) {
+        // FOR MOBILE PLATFORM
+        if (imageMobilePath != null) {
+          // UPLOAD IMAGE AND GET DOWNLOAD URL
+          imageDownloadUrl = await storageRepo.uploadProfileImageMobile(
+            imageMobilePath,
+            uid,
+          );
+        }
+        // FOR WEB PLATFORM
+        else if (imageWebBytes != null) {
+          // UPLOAD IMAGE AND GET DOWNLOAD URL
+          imageDownloadUrl = await storageRepo.uploadProfileImageWeb(
+            imageWebBytes,
+            uid,
+          );
+        }
+
+        if (imageDownloadUrl == null) {
+          emit(ProfileError("Failed to upload profile picture"));
+          return;
+        }
+      }
 
       // UPDATE NEW PROFILE
       final updatedProfile = currentUser.copyWith(
         newBio: newBio ?? currentUser.bio,
+        newProfileImageUrl: imageDownloadUrl ?? currentUser.profileImageUrl,
       );
 
       // UPDATE IN REPO
