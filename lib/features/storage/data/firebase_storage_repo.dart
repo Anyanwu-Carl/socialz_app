@@ -2,11 +2,13 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:social_bloc/features/post/presentation/pages/upload_post_page.dart';
 import 'package:social_bloc/features/storage/domain/storage_repo.dart';
 
 class FirebaseStorageRepo implements StorageRepo {
   final FirebaseStorage storage = FirebaseStorage.instance;
 
+  // PROFILE PICTURES --> UPLOAD PROFILE IMAGES TO STORAGE
   @override
   // UPLOAD PROFILE IMAGES ON MOBILE PLATFORM
   Future<String?> uploadProfileImageMobile(String path, String fileName) {
@@ -17,6 +19,19 @@ class FirebaseStorageRepo implements StorageRepo {
   // UPLOAD PROFILE IMAGES ON WEB PLATFORM
   Future<String?> uploadProfileImageWeb(Uint8List fileBytes, String fileName) {
     return _uploadFileBytes(fileBytes, fileName, "profile_images");
+  }
+
+  // POST PICTURE --> UPLOAD POST IMAGES TO STORAGE
+  @override
+  // UPLOAD PROFILE IMAGES ON MOBILE PLATFORM
+  Future<String?> uploadPostImageMobile(String path, String fileName) {
+    return _uploadFile(path, fileName, "post_images");
+  }
+
+  @override
+  // UPLOAD PROFILE IMAGES ON WEB PLATFORM
+  Future<String?> uploadPostImageWeb(Uint8List fileBytes, String fileName) {
+    return _uploadFileBytes(fileBytes, fileName, "post_images");
   }
 
   /*

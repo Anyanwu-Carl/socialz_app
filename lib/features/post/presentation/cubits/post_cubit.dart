@@ -25,15 +25,12 @@ class PostCubit extends Cubit<PostState> {
       // HANDLE IMAGE UPLOAD FOR MOBILE PLATFORMS (USING FILE PATH)
       if (imagePath != null) {
         emit(PostUploading());
-        imageUrl = await storageRepo.uploadProfileImageMobile(
-          imagePath,
-          post.id,
-        );
+        imageUrl = await storageRepo.uploadPostImageMobile(imagePath, post.id);
       }
       // HANDLE IMAGE UPLOAD FOR WEB PLATFORMS (USING FILE BYTES)
       else if (imageBytes != null) {
         emit(PostUploading());
-        imageUrl = await storageRepo.uploadProfileImageWeb(imageBytes, post.id);
+        imageUrl = await storageRepo.uploadPostImageWeb(imageBytes, post.id);
       }
 
       // GIVE IMAGE URL TO POST
@@ -41,6 +38,9 @@ class PostCubit extends Cubit<PostState> {
 
       // CREATE POST IN FIREBASE(BACKEND)
       postRepo.createPost(newPost);
+
+      // RE-FETCH ALL POSTS
+      fetchAllPosts();
     } catch (e) {
       emit(PostsError("Failed to create post: $e"));
     }

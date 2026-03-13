@@ -5,6 +5,8 @@ import 'package:social_bloc/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:social_bloc/features/auth/presentation/cubit/auth_states.dart';
 import 'package:social_bloc/features/auth/presentation/pages/auth_page.dart';
 import 'package:social_bloc/features/home/presentation/pages/home_page.dart';
+import 'package:social_bloc/features/post/data/firebase_post_repo.dart';
+import 'package:social_bloc/features/post/presentation/cubits/post_cubit.dart';
 import 'package:social_bloc/features/profile/data/firebase_profile_repo.dart';
 import 'package:social_bloc/features/profile/presentation/cubits/profile_cubits.dart';
 import 'package:social_bloc/features/storage/data/firebase_storage_repo.dart';
@@ -43,6 +45,9 @@ class MyApp extends StatelessWidget {
   // STORAGE REPO
   final firebaseStorageRepo = FirebaseStorageRepo();
 
+  // POST REPO
+  final firebasePostRepo = FirebasePostRepo();
+
   MyApp({super.key});
 
   @override
@@ -60,6 +65,14 @@ class MyApp extends StatelessWidget {
         BlocProvider<ProfileCubit>(
           create: (context) => ProfileCubit(
             profileRepo: firebaseProfileRepo,
+            storageRepo: firebaseStorageRepo,
+          ),
+        ),
+
+        // POST CUBIT
+        BlocProvider<PostCubit>(
+          create: (context) => PostCubit(
+            postRepo: firebasePostRepo,
             storageRepo: firebaseStorageRepo,
           ),
         ),
