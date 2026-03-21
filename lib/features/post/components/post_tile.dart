@@ -58,6 +58,36 @@ class _PostTileState extends State<PostTile> {
     }
   }
 
+  // LIKES
+  // User tapped like button
+  void toogleLikePost() {
+    // Current like status
+    final isLiked = widget.post.likes.contains(currentUser!.uid);
+
+    // Optimistically like and update UI
+    setState(() {
+      if (isLiked) {
+        widget.post.likes.remove(currentUser!.uid); // Unlike
+      } else {
+        widget.post.likes.add(currentUser!.uid); // Like
+      }
+    });
+
+    // update like status
+    postCubit.toogleLikePost(widget.post.id, currentUser!.uid).catchError((
+      error,
+    ) {
+      // If there's an error, revert back to it's original values
+      setState(() {
+        if (isLiked) {
+          widget.post.likes.add(currentUser!.uid); // revert unlike
+        } else {
+          widget.post.likes.remove(currentUser!.uid); // revert Like
+        }
+      });
+    });
+  }
+
   // SHOW OPTIONS FOR POST DELETION
   void showOptions() {
     showDialog(
@@ -117,19 +147,30 @@ class _PostTileState extends State<PostTile> {
 
                 const SizedBox(width: 10),
                 // USERNAME
-                Text(widget.post.userName),
+                Text(
+                  widget.post.userName,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
 
                 const Spacer(),
 
                 // DELETE BUTTON
                 if (isOwnPost)
-                  IconButton(
-                    onPressed: showOptions,
-                    icon: const Icon(Icons.delete),
+                  GestureDetector(
+                    onTap: showOptions,
+                    child: Icon(
+                      Icons.delete,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
               ],
             ),
           ),
+
+          // IMAGE
           CachedNetworkImage(
             imageUrl: widget.post.imageUrl,
             height: 430,
@@ -137,6 +178,54 @@ class _PostTileState extends State<PostTile> {
             fit: BoxFit.cover,
             placeholder: (context, url) => const SizedBox(height: 430),
             errorWidget: (context, url, error) => const Icon(Icons.error),
+          ),
+
+          // BUTTONS --> Like, comment, and timestamp
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                // LIKE BUTTON
+                SizedBox(
+                  width: 50,
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: toogleLikePost,
+                        child: Icon(
+                          widget.post.likes.contains(currentUser!.uid)
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: widget.post.likes.contains(currentUser!.uid)
+                              ? Colors.red
+                              : Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+
+                      // Like count
+                      Text(
+                        widget.post.likes.length.toString(),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 20),
+
+                // Comment Button
+                const Icon(Icons.comment),
+                const Text("0"),
+
+                const Spacer(),
+
+                // Time stamp
+                Text(widget.post.timestamp.toString()),
+              ],
+            ),
           ),
         ],
       ),

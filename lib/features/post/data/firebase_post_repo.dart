@@ -60,4 +60,33 @@ class FirebasePostRepo implements PostRepo {
       throw Exception("Error fetching user posts: $e");
     }
   }
+
+  @override
+  Future<void> toogleLikePost(String postId, String userId) async {
+    try {
+      // Get the post documents from firestore
+      final postDoc = await postsCollection.doc(postId).get();
+
+      if (postDoc.exists) {
+        final post = Post.fromJson(postDoc.data() as Map<String, dynamic>);
+
+        // Check if the user has already liked the post
+        final hasLiked = post.likes.contains(userId);
+
+        // Update the likes list
+        if (hasLiked) {
+          post.likes.remove(userId); // Unlike
+        } else {
+          post.likes.add(userId); //Like
+        }
+
+        // update the post document with the new like list
+        await postsCollection.doc(postId).update({'likes': post.likes});
+      } else {
+        throw Exception("Post not found");
+      }
+    } catch (e) {
+      throw Exception("Error toggling likes: $e");
+    }
+  }
 }
