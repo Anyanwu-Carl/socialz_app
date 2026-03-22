@@ -58,7 +58,8 @@ class _PostTileState extends State<PostTile> {
     }
   }
 
-  // LIKES
+  // ------------LIKES--------------
+
   // User tapped like button
   void toogleLikePost() {
     // Current like status
@@ -87,6 +88,8 @@ class _PostTileState extends State<PostTile> {
       });
     });
   }
+
+  // -------------COMMENTS---------------
 
   // SHOW OPTIONS FOR POST DELETION
   void showOptions() {
