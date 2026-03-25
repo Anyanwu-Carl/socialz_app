@@ -129,7 +129,7 @@ class FirebasePostRepo implements PostRepo {
         // Add new comment
         post.comments.removeWhere((comment) => comment.id == commentId);
 
-        // Update the post documnet in firestore
+        // Update the post document in firestore
         await postsCollection.doc(postId).update({
           'comments': post.comments.map((comment) => comment.toJson()).toList(),
         });

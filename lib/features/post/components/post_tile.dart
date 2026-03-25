@@ -2,9 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_bloc/features/auth/domain/entity/app_user.dart';
+import 'package:social_bloc/features/auth/presentation/components/my_text_field.dart';
 import 'package:social_bloc/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:social_bloc/features/post/components/comment_tile.dart';
+import 'package:social_bloc/features/post/domain/entities/comment.dart';
 import 'package:social_bloc/features/post/domain/entities/post.dart';
 import 'package:social_bloc/features/post/presentation/cubits/post_cubit.dart';
+import 'package:social_bloc/features/post/presentation/cubits/posts_states.dart';
 import 'package:social_bloc/features/profile/domain/entities/profile_user.dart';
 import 'package:social_bloc/features/profile/presentation/cubits/profile_cubits.dart';
 
@@ -90,6 +94,63 @@ class _PostTileState extends State<PostTile> {
   }
 
   // -------------COMMENTS---------------
+
+  // Comment text controller
+  final commentTextController = TextEditingController();
+
+  // Open comment box --> User wants to type in a comment
+  void openNewCommentBox() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: MyTextField(
+          hintText: "Type a comment",
+          obsureText: false,
+          controller: commentTextController,
+        ),
+        actions: [
+          // Cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("cancel"),
+          ),
+
+          // Save button
+          TextButton(
+            onPressed: () {
+              addComment();
+              Navigator.pop(context);
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Add new comment
+  void addComment() {
+    // Create new comment
+    final newComment = Comment(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      postId: widget.post.id,
+      userId: currentUser!.uid,
+      userName: currentUser!.name,
+      text: commentTextController.text,
+      timestamp: DateTime.now(),
+    );
+
+    // Add comment using cubit
+    if (commentTextController.text.isNotEmpty) {
+      postCubit.addComment(widget.post.id, newComment);
+    }
+  }
+
+  @override
+  void dispose() {
+    commentTextController.dispose();
+    super.dispose();
+  }
 
   // SHOW OPTIONS FOR POST DELETION
   void showOptions() {
@@ -190,7 +251,7 @@ class _PostTileState extends State<PostTile> {
               children: [
                 // LIKE BUTTON
                 SizedBox(
-                  width: 50,
+                  width: 40,
                   child: Row(
                     children: [
                       GestureDetector(
@@ -204,6 +265,8 @@ class _PostTileState extends State<PostTile> {
                               : Theme.of(context).colorScheme.primary,
                         ),
                       ),
+
+                      const SizedBox(width: 5),
 
                       // Like count
                       Text(
@@ -220,8 +283,24 @@ class _PostTileState extends State<PostTile> {
                 const SizedBox(width: 20),
 
                 // Comment Button
-                const Icon(Icons.comment),
-                const Text("0"),
+                GestureDetector(
+                  onTap: openNewCommentBox,
+                  child: Icon(
+                    Icons.comment,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+
+                const SizedBox(width: 5),
+
+                // Comments count
+                Text(
+                  widget.post.comments.length.toString(),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 12,
+                  ),
+                ),
 
                 const Spacer(),
 
@@ -229,6 +308,71 @@ class _PostTileState extends State<PostTile> {
                 Text(widget.post.timestamp.toString()),
               ],
             ),
+          ),
+
+          // CAPTION
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 10.0,
+              horizontal: 20.0,
+            ),
+            child: Row(
+              children: [
+                // Username
+                Text(
+                  widget.post.userName,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(width: 5),
+
+                // Text
+                Text(widget.post.text),
+              ],
+            ),
+          ),
+
+          // Comment
+          BlocBuilder<PostCubit, PostState>(
+            builder: (context, state) {
+              // LOADED
+              if (state is PostsLoaded) {
+                // Final individual post
+                final post = state.posts.firstWhere(
+                  (post) => (post.id == widget.post.id),
+                );
+
+                if (post.comments.isNotEmpty) {
+                  // How many comments to show
+                  int showCommentCount = post.comments.length;
+
+                  // Comment section
+                  return ListView.builder(
+                    itemCount: showCommentCount,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      // get individual comment
+                      final comment = post.comments[index];
+
+                      // Comment tile UI
+                      return CommentTile(comment: comment);
+                    },
+                  );
+                }
+              }
+
+              // Loading
+              if (state is PostsLoading) {
+                return const CircularProgressIndicator();
+              }
+              // Error
+              else if (state is PostsError) {
+                return Center(child: Text(state.message));
+              } else {
+                return const SizedBox();
+              }
+            },
           ),
         ],
       ),

@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_bloc/features/profile/domain/entities/profile_user.dart';
 import 'package:social_bloc/features/profile/domain/repo/profile_repo.dart';

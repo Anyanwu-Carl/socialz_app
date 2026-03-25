@@ -40,7 +40,7 @@ class Post {
     return {
       'id': id,
       'userId': userId,
-      'username': userName,
+      'userName': userName,
       'text': text,
       'imageUrl': imageUrl,
       'timestamp': Timestamp.fromDate(timestamp),
@@ -59,12 +59,14 @@ class Post {
         [];
 
     return Post(
-      id: json['id'],
-      userId: json['userId'],
-      userName: json['username'],
-      text: json['text'],
-      imageUrl: json['imageUrl'],
-      timestamp: (json['timestamp'] as Timestamp).toDate(),
+      id: json['id'] ?? '',
+      userId: json['userId'] ?? '',
+      userName: json['username'] ?? json['userName'] ?? 'Unknown',
+      text: json['text'] ?? '',
+      imageUrl: json['imageUrl'] ?? '',
+      timestamp: json['timestamp'] != null
+          ? (json['timestamp'] as Timestamp).toDate()
+          : DateTime.now(),
       likes: List<String>.from(json['likes'] ?? []),
       comments: comments,
     );

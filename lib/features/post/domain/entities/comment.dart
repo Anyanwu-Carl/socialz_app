@@ -23,7 +23,7 @@ class Comment {
       'id': id,
       'postId': postId,
       'userId': userId,
-      'username': userName,
+      'userName': userName,
       'text': text,
       'timestamp': Timestamp.fromDate(timestamp),
     };
@@ -32,12 +32,14 @@ class Comment {
   // Convert json to comment
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
-      id: json['id'],
-      postId: json['postId'],
-      userId: json['userId'],
-      userName: json['userName'],
-      text: json['text'],
-      timestamp: (json['timestamp'] as Timestamp).toDate(),
+      id: json['id'] ?? '',
+      postId: json['postId'] ?? '',
+      userId: json['userId'] ?? '',
+      userName: json['userName'] ?? json['username'] ?? 'Unknown',
+      text: json['text'] ?? '',
+      timestamp: json['timestamp'] != null
+          ? (json['timestamp'] as Timestamp).toDate()
+          : DateTime.now(),
     );
   }
 }
