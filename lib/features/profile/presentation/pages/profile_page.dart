@@ -8,9 +8,12 @@ import 'package:social_bloc/features/post/components/post_tile.dart';
 import 'package:social_bloc/features/post/presentation/cubits/post_cubit.dart';
 import 'package:social_bloc/features/post/presentation/cubits/posts_states.dart';
 import 'package:social_bloc/features/profile/presentation/component/bio_box.dart';
+import 'package:social_bloc/features/profile/presentation/component/follow_button.dart';
+import 'package:social_bloc/features/profile/presentation/component/profile_stats.dart';
 import 'package:social_bloc/features/profile/presentation/cubits/profile_cubits.dart';
 import 'package:social_bloc/features/profile/presentation/cubits/profile_states.dart';
 import 'package:social_bloc/features/profile/presentation/pages/edit_profile_page.dart';
+import 'package:social_bloc/features/profile/presentation/pages/follower_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String uid;
@@ -40,9 +43,50 @@ class _ProfilePageState extends State<ProfilePage> {
     profileCubit.fetchUserProfile(widget.uid);
   }
 
+  // ----------Follow and Unfollow-----------------
+  void followButtonPressed() {
+    final profileState = profileCubit.state;
+    if (profileState is! ProfileLoaded) {
+      return; // Return is profile is not loaded
+    }
+
+    final profileUser = profileState.profileUser;
+    final isFollowing = profileUser.followers.contains(currentUser!.uid);
+
+    // Optimistically update the UI
+    setState(() {
+      // Unfollow
+      if (isFollowing) {
+        profileUser.followers.remove(currentUser!.uid);
+      }
+      // Follow
+      else {
+        profileUser.followers.add(currentUser!.uid);
+      }
+    });
+
+    // Perform actual toggle in cubit
+    profileCubit.toggleFollow(currentUser!.uid, widget.uid).catchError((error) {
+      // Revert update if there was an error
+      setState(() {
+        // Unfollow
+        if (isFollowing) {
+          profileUser.followers.add(currentUser!.uid);
+        }
+        // Follow
+        else {
+          profileUser.followers.remove(currentUser!.uid);
+        }
+      });
+    });
+  }
+
   // UI
   @override
   Widget build(BuildContext context) {
+    // Is own post
+    bool isOwnPost = (widget.uid == currentUser!.uid);
+
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         // LOADED
@@ -50,23 +94,28 @@ class _ProfilePageState extends State<ProfilePage> {
           // GET LOADED USER
           final user = state.profileUser;
 
+          // Scaffold
           return Scaffold(
+            // Appbar
             appBar: AppBar(
               title: Text(user.name),
               centerTitle: true,
               foregroundColor: Theme.of(context).colorScheme.primary,
               actions: [
-                IconButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfilePage(user: user),
+                // Edit profile button (only fow own profile)
+                if (isOwnPost)
+                  IconButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditProfilePage(user: user),
+                      ),
                     ),
+                    icon: const Icon(Icons.settings),
                   ),
-                  icon: const Icon(Icons.settings),
-                ),
               ],
             ),
+            // Body
             body: ListView(
               children: [
                 // USER EMAIl
@@ -96,18 +145,47 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
 
                   // LOADED IMAGE
-                  imageBuilder: (context, imageProvider) => Container(
-                    height: 120,
-                    width: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: imageProvider,
-                        fit: BoxFit.cover,
+                  imageBuilder: (context, imageProvider) => Center(
+                    child: Container(
+                      height: 120,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 25),
+
+                // Profile stats
+                ProfileStats(
+                  postCount: postCount,
+                  followerCount: user.followers.length,
+                  followingCount: user.following.length,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FollowerPage(
+                        followers: user.followers,
+                        following: user.following,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                // Follow button
+                if (!isOwnPost)
+                  FollowButton(
+                    onPressed: followButtonPressed,
+                    isFollowing: user.followers.contains(currentUser!.uid),
+                  ),
 
                 const SizedBox(height: 25),
 
