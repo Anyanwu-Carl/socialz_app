@@ -14,6 +14,7 @@ import 'package:social_bloc/features/profile/presentation/cubits/profile_cubits.
 import 'package:social_bloc/features/profile/presentation/cubits/profile_states.dart';
 import 'package:social_bloc/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:social_bloc/features/profile/presentation/pages/follower_page.dart';
+import 'package:social_bloc/responsive/constrained_scaffold.dart';
 
 class ProfilePage extends StatefulWidget {
   final String uid;
@@ -95,7 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
           final user = state.profileUser;
 
           // Scaffold
-          return Scaffold(
+          return ConstrainedScaffold(
             // Appbar
             appBar: AppBar(
               title: Text(user.name),

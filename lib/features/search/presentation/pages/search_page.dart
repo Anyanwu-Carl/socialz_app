@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_bloc/features/profile/presentation/component/user_tile.dart';
 import 'package:social_bloc/features/search/presentation/cubits/search_cubit.dart';
 import 'package:social_bloc/features/search/presentation/cubits/search_states.dart';
+import 'package:social_bloc/responsive/constrained_scaffold.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -35,7 +36,7 @@ class _SearchPageState extends State<SearchPage> {
   // BUILD UI
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ConstrainedScaffold(
       appBar: AppBar(
         title: TextField(
           controller: searchController,

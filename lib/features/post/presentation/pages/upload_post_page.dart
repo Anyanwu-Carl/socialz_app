@@ -11,6 +11,7 @@ import 'package:social_bloc/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:social_bloc/features/post/domain/entities/post.dart';
 import 'package:social_bloc/features/post/presentation/cubits/post_cubit.dart';
 import 'package:social_bloc/features/post/presentation/cubits/posts_states.dart';
+import 'package:social_bloc/responsive/constrained_scaffold.dart';
 
 class UploadPostPage extends StatefulWidget {
   const UploadPostPage({super.key});
@@ -131,7 +132,7 @@ class _UploadPostPageState extends State<UploadPostPage> {
 
   Widget buildUploadPage() {
     // Scaffold
-    return Scaffold(
+    return ConstrainedScaffold(
       // APP BAR
       appBar: AppBar(
         title: const Text("Create Post"),

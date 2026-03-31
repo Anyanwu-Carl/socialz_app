@@ -16,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_bloc/features/auth/presentation/components/my_button.dart';
 import 'package:social_bloc/features/auth/presentation/components/my_text_field.dart';
 import 'package:social_bloc/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:social_bloc/responsive/constrained_scaffold.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function()? tooglePages;
@@ -63,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
   // UI
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ConstrainedScaffold(
       body: SafeArea(
         child: Center(
           child: Padding(

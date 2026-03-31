@@ -5,6 +5,7 @@ import 'package:social_bloc/features/post/components/post_tile.dart';
 import 'package:social_bloc/features/post/presentation/cubits/post_cubit.dart';
 import 'package:social_bloc/features/post/presentation/cubits/posts_states.dart';
 import 'package:social_bloc/features/post/presentation/pages/upload_post_page.dart';
+import 'package:social_bloc/responsive/constrained_scaffold.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -37,7 +38,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ConstrainedScaffold(
       appBar: AppBar(
         title: const Text("H O M E"),
         centerTitle: true,

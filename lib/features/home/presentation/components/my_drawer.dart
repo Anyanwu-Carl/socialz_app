@@ -4,6 +4,7 @@ import 'package:social_bloc/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:social_bloc/features/home/presentation/components/my_drawer_tile.dart';
 import 'package:social_bloc/features/profile/presentation/pages/profile_page.dart';
 import 'package:social_bloc/features/search/presentation/pages/search_page.dart';
+import 'package:social_bloc/features/settings/pages/settings_page.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -76,12 +77,12 @@ class MyDrawer extends StatelessWidget {
                 icon: Icons.settings,
                 onTap: () {
                   Navigator.pop(context);
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => const SettingsPage(),
-                  //   ),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsPage(),
+                    ),
+                  );
                 },
               ),
 
